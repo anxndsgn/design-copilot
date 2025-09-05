@@ -1,3 +1,5 @@
+import { aiFeedbackHandler } from "./handlers/ai-feedback-handler";
+
 figma.showUI(__html__, { themeColors: true, height: 300 });
 
 figma.ui.onmessage = (msg) => {
