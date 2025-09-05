@@ -1,6 +1,6 @@
 import { aiFeedbackHandler } from "./handlers/ai-feedback-handler";
 
-figma.showUI(__html__, { themeColors: true, height: 300 });
+figma.showUI(__html__, { themeColors: true, height: 400 });
 
 figma.ui.onmessage = (msg) => {
   if (msg.type === "create-rectangles") {
