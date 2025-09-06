@@ -1,6 +1,6 @@
 {
-  "name": "Design Copilot",
-  "id": "design-copilot",
+  "name": "Design Lint",
+  "id": "design-lint",
   "api": "1.0.0",
   "editorType": ["figma"],
   "permissions": [],
