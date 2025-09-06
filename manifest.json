@@ -7,7 +7,7 @@
   "main": "dist/code.js",
   "ui": "dist/index.html",
   "networkAccess": {
-    "allowedDomains": ["https://api.dify.ai"]
+    "allowedDomains": ["https://openrouter.ai/api/v1/"]
   },
   "documentAccess": "dynamic-page"
 }

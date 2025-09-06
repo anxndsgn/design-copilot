@@ -1,102 +1,79 @@
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { streamText } from "ai";
+import { useState } from "react";
 
-export function Home() {
-  const [apiKey, setApiKey] = useState("");
-  const [workflowId, setWorkflowId] = useState("");
-  const [feedback, setFeedback] = useState<string>("");
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
+export default function Home() {
+  const [output, setOutput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>(() => {
+    try {
+      return localStorage.getItem("openrouter_api_key") ?? "";
+    } catch {
+      return "";
+    }
+  });
 
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const msg = (event.data && (event.data as any).pluginMessage) || null;
-      if (!msg) return;
-      if (msg.type === "ai-feedback") {
-        setFeedback(String(msg.payload || ""));
-        setLoading(false);
-      } else if (msg.type === "ai-error") {
-        setLoading(false);
-      }
-    };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, []);
-
-  const handleClick = () => {
-    setLoading(true);
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: "get-feedback",
-        },
-      },
-      "*"
-    );
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setApiKey(value);
+    try {
+      localStorage.setItem("openrouter_api_key", value);
+    } catch {
+      // ignore persistence failures
+    }
   };
 
-  const saveSettings = async () => {
-    setSaving(true);
+  const handleClick = async () => {
+    setIsLoading(true);
+    setError("");
+    setOutput("");
     try {
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: "set-api-key",
-            value: apiKey,
-          },
+      if (!apiKey) {
+        throw new Error(
+          "OpenRouter API key is missing. Please enter it above."
+        );
+      }
+
+      const openrouter = createOpenRouter({ apiKey });
+      const chatModel = openrouter.chat("google/gemini-2.5-flash");
+      const result = streamText({
+        model: chatModel,
+        prompt: "What is OpenRouter?",
+        onError({ error }) {
+          setError(error instanceof Error ? error.message : String(error));
         },
-        "*"
-      );
-      parent.postMessage(
-        {
-          pluginMessage: {
-            type: "set-workflow-id",
-            value: workflowId,
-          },
-        },
-        "*"
-      );
+      });
+
+      for await (const delta of result.textStream) {
+        setOutput((prev) => prev + delta);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Dify API Key</label>
+    <div>
+      <div style={{ marginBottom: 12 }}>
         <input
-          className="border rounded px-2 py-1"
           type="password"
-          placeholder="sk-..."
+          placeholder="Enter OpenRouter API key"
           value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
+          onChange={handleApiKeyChange}
+          style={{ width: 360, padding: 8 }}
         />
-        <label className="text-sm font-medium">Workflow ID</label>
-        <input
-          className="border rounded px-2 py-1"
-          type="text"
-          placeholder="workflow_..."
-          value={workflowId}
-          onChange={(e) => setWorkflowId(e.target.value)}
-        />
-        <Button onClick={saveSettings} disabled={saving}>
-          {saving ? "Saving..." : "Save Settings"}
-        </Button>
-      </div> */}
-
-      <div className="flex items-center gap-2">
-        <Button onClick={handleClick} disabled={loading}>
-          {loading ? "Thinking..." : "Get feedback"}
-        </Button>
       </div>
-
-      <div className="mt-2">
-        <label className="text-sm font-medium">Feedback</label>
-        <pre className="whitespace-pre-wrap border rounded p-2 max-h-64 overflow-auto">
-          {feedback || "No feedback yet."}
-        </pre>
-      </div>
+      <Button disabled={isLoading} onClick={handleClick}>
+        {isLoading ? "Streaming…" : "Stream from OpenRouter"}
+      </Button>
+      {error && <p style={{ color: "red", marginTop: 12 }}>{error}</p>}
+      {output && (
+        <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{output}</pre>
+      )}
     </div>
   );
 }
