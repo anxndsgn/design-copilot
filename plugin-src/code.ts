@@ -1,9 +1,9 @@
-import { getNodeTree } from "./handlers/get-node-tree";
+import { aiFeedbackHandler } from "./handlers/ai-feedback-handler";
 
 figma.showUI(__html__, { themeColors: true, height: 400 });
 
-figma.ui.onmessage = (msg) => {
-  if (msg.type === "get-node-tree") {
-    getNodeTree();
+figma.ui.onmessage = async (msg) => {
+  if (msg.type === "get-feedback") {
+    aiFeedbackHandler();
   }
 };

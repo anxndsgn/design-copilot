@@ -5,7 +5,7 @@ export function Home() {
     parent.postMessage(
       {
         pluginMessage: {
-          type: "get-node-tree",
+          type: "get-feedback",
         },
       },
       "*"
@@ -13,7 +13,7 @@ export function Home() {
   };
   return (
     <div>
-      <Button onClick={handleClick}>get node tree</Button>
+      <Button onClick={handleClick}>get feedback</Button>
     </div>
   );
 }
