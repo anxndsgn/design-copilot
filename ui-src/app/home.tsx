@@ -1,29 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText } from "ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ScrollArea } from "@base-ui-components/react/scroll-area";
 
 export default function Home() {
   const [output, setOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [apiKey, setApiKey] = useState<string>(() => {
-    try {
-      return localStorage.getItem("openrouter_api_key") ?? "";
-    } catch {
-      return "";
-    }
-  });
+  const [apiKey, setApiKey] = useState<string>("");
 
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setApiKey(value);
-    try {
-      localStorage.setItem("openrouter_api_key", value);
-    } catch {
-      // ignore persistence failures
-    }
-  };
+  useEffect(() => {
+    parent.postMessage({ pluginMessage: { type: "get-api-key" } }, "*");
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const message =
+        (event.data && (event.data as any).pluginMessage) || undefined;
+      if (message?.type === "get-api-key") {
+        setApiKey(message.apiKey ?? "");
+        console.log("API key set", message.apiKey);
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -57,23 +59,19 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: 12 }}>
-        <input
-          type="password"
-          placeholder="Enter OpenRouter API key"
-          value={apiKey}
-          onChange={handleApiKeyChange}
-          style={{ width: 360, padding: 8 }}
-        />
-      </div>
+    <div className="h-full flex flex-col">
       <Button disabled={isLoading} onClick={handleClick}>
-        {isLoading ? "Streaming…" : "Stream from OpenRouter"}
+        {isLoading ? "Streaming…" : "get feedback"}
       </Button>
-      {error && <p style={{ color: "red", marginTop: 12 }}>{error}</p>}
-      {output && (
-        <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{output}</pre>
-      )}
+      <ScrollArea.Root className="mt-2 h-64 text-black-1000 dark:text-white-1000 typography-body-medium overflow-y-auto bg-grey-100 dark:bg-grey-700 rounded-md">
+        <ScrollArea.Viewport className="h-full p-2 overscroll-contain rounded-md">
+          {error && <p className="text-red-500">{error}</p>}
+          {output && <pre className="mt-2 whitespace-pre-wrap">{output}</pre>}
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar className="m-2 flex w-1 justify-center rounded bg-grey-200 opacity-0 transition-opacity delay-300 data-[hovering]:opacity-100 data-[hovering]:delay-0 data-[hovering]:duration-75 data-[scrolling]:opacity-100 data-[scrolling]:delay-0 data-[scrolling]:duration-75 dark:bg-grey-700 dark:data-[hovering]:bg-grey-600 dark:data-[scrolling]:bg-grey-600">
+          <ScrollArea.Thumb className="w-full rounded bg-grey-500 dark:bg-grey-400" />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
     </div>
   );
 }

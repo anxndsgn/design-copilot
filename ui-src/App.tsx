@@ -6,16 +6,16 @@ import { Separator } from "./components/ui/sepatator";
 function App() {
   return (
     <main className="flex flex-col bg-white-1000 dark:bg-grey-800 h-screen">
-      <Tabs>
+      <Tabs defaultValue="home" className="flex-1 flex flex-col">
         <TabsList className={"p-2"}>
           <Tab value="home">Home</Tab>
           <Tab value="settings">Settings</Tab>
         </TabsList>
         <Separator />
-        <TabsPanel value="home" className={"p-2"}>
+        <TabsPanel value="home" className={"p-2 h-full flex-1"}>
           <Home />
         </TabsPanel>
-        <TabsPanel value="settings" className={"p-2"}>
+        <TabsPanel value="settings" className={"p-2 h-full flex-1"}>
           <Settings />
         </TabsPanel>
       </Tabs>
