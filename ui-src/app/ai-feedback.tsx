@@ -1,3 +1,17 @@
 export function AiFeedback() {
-  return <div>AiFeedback</div>;
+  const handleClick = () => {
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: "get-node-tree",
+        },
+      },
+      "*"
+    );
+  };
+  return (
+    <div>
+      <button onClick={handleClick}>get node tree</button>
+    </div>
+  );
 }
