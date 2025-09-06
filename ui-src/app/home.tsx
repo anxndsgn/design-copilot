@@ -1,4 +1,6 @@
-export function AiFeedback() {
+import { Button } from "@/components/ui/button";
+
+export function Home() {
   const handleClick = () => {
     parent.postMessage(
       {
@@ -11,7 +13,7 @@ export function AiFeedback() {
   };
   return (
     <div>
-      <button onClick={handleClick}>get node tree</button>
+      <Button onClick={handleClick}>get node tree</Button>
     </div>
   );
 }
