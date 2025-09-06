@@ -6,6 +6,7 @@ export function Home() {
   const [workflowId, setWorkflowId] = useState("");
   const [feedback, setFeedback] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -13,6 +14,9 @@ export function Home() {
       if (!msg) return;
       if (msg.type === "ai-feedback") {
         setFeedback(String(msg.payload || ""));
+        setLoading(false);
+      } else if (msg.type === "ai-error") {
+        setLoading(false);
       }
     };
     window.addEventListener("message", handler);
@@ -20,6 +24,7 @@ export function Home() {
   }, []);
 
   const handleClick = () => {
+    setLoading(true);
     parent.postMessage(
       {
         pluginMessage: {
@@ -81,7 +86,9 @@ export function Home() {
       </div> */}
 
       <div className="flex items-center gap-2">
-        <Button onClick={handleClick}>get feedback</Button>
+        <Button onClick={handleClick} disabled={loading}>
+          {loading ? "Thinking..." : "Get feedback"}
+        </Button>
       </div>
 
       <div className="mt-2">

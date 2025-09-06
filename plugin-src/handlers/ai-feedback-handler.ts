@@ -40,6 +40,7 @@ export async function aiFeedbackHandler() {
     const errMsg = error instanceof Error ? error.message : String(error);
     figma.notify(`AI feedback error: ${errMsg}`);
     console.error("AI feedback error", error);
+    figma.ui.postMessage({ type: "ai-error", payload: errMsg });
   }
 }
 
