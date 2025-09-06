@@ -1,3 +1,9 @@
-export function getNodeTree(msg: { type: "get-node-tree" }) {
-  console.log("getNodeTree");
+export function getNodeTree() {
+  const selection = figma.currentPage.selection[0];
+
+  return nodeToJson(selection);
+}
+
+function nodeToJson(node: SceneNode) {
+  return JSON.stringify(node);
 }
