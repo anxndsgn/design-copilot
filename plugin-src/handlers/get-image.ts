@@ -1,22 +1,26 @@
-export async function getDesignImage() {
-  const selection = figma.currentPage.selection[0];
-  if (!selection) {
+export async function getDesignImages() {
+  const selection = figma.currentPage.selection;
+  if (!selection.length) {
     figma.ui.postMessage(
       {
         type: "get-design-image-error",
-        error: "No selection found. Please select a layer or frame.",
+        error: "No selection found. Please select at least one layer or frame.",
       },
-      { origin: "*" }
+      { origin: "*" },
     );
     return;
   }
   try {
-    const designImage = await selection.exportAsync({
-      format: "PNG",
-    });
+    const designImages = await Promise.all(
+      selection.map((node) =>
+        node.exportAsync({
+          format: "PNG",
+        }),
+      ),
+    );
     figma.ui.postMessage(
-      { type: "get-design-image", designImage },
-      { origin: "*" }
+      { type: "get-design-image", designImages },
+      { origin: "*" },
     );
   } catch (err) {
     figma.ui.postMessage(
@@ -24,7 +28,7 @@ export async function getDesignImage() {
         type: "get-design-image-error",
         error: err instanceof Error ? err.message : "Failed to export image.",
       },
-      { origin: "*" }
+      { origin: "*" },
     );
   }
 }

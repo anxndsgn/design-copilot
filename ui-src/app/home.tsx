@@ -28,8 +28,8 @@ export default function Home() {
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  const awaitDesignImage = () =>
-    new Promise<Uint8Array>((resolve, reject) => {
+  const awaitDesignImages = () =>
+    new Promise<Uint8Array[]>((resolve, reject) => {
       const onMessage = (event: MessageEvent) => {
         const message =
           (event.data && (event.data as any).pluginMessage) || undefined;
@@ -37,15 +37,18 @@ export default function Home() {
         if (message.type === "get-design-image") {
           window.removeEventListener("message", onMessage);
           try {
-            // message.designImage can be ArrayBuffer or Uint8Array
-            const data =
-              message.designImage instanceof ArrayBuffer
-                ? new Uint8Array(message.designImage)
-                : new Uint8Array(message.designImage);
+            // message.designImages can be ArrayBuffer[] or Uint8Array[]
+            const data = (
+              message.designImages as (ArrayBuffer | Uint8Array)[]
+            ).map((img) =>
+              img instanceof ArrayBuffer
+                ? new Uint8Array(img)
+                : new Uint8Array(img),
+            );
             resolve(data);
           } catch (e) {
             reject(
-              e instanceof Error ? e : new Error("Invalid image data received")
+              e instanceof Error ? e : new Error("Invalid image data received"),
             );
           }
         } else if (message.type === "get-design-image-error") {
@@ -54,8 +57,8 @@ export default function Home() {
             new Error(
               typeof message.error === "string"
                 ? message.error
-                : "Failed to get design image"
-            )
+                : "Failed to get design image",
+            ),
           );
         }
       };
@@ -69,11 +72,11 @@ export default function Home() {
     try {
       if (!apiKey) {
         throw new Error(
-          "OpenRouter API key is missing. Please enter it above."
+          "OpenRouter API key is missing. Please enter it above.",
         );
       }
       parent.postMessage({ pluginMessage: { type: "get-design-image" } }, "*");
-      const imageBytes = await awaitDesignImage();
+      const imageBytesArr = await awaitDesignImages();
 
       const openrouter = createOpenRouter({ apiKey });
       const chatModel = openrouter.chat("google/gemini-2.5-flash");
@@ -85,13 +88,13 @@ export default function Home() {
             content: [
               {
                 type: "text",
-                text: "你是一个超级犀利的设计锐评师，拥有超凡的观察力和表达能力，能从给你的设计稿图片中揪出最可笑、最讽刺的点，然后用最幽默、最自嘲、最讽刺、最刁钻、最尖锐的语言进行点评，还能通过各种新奇的角度、形象的比喻、讽刺的成语以及拿其他事物来做对比，把设计稿批得体无完肤。语言要足够幽默、嘲讽、尖锐。",
+                text: "你是一位专业的设计评审，请从以下提供的设计稿中选出最优秀的一份并说明理由。",
               },
-              {
-                type: "image",
-                image: imageBytes,
+              ...imageBytesArr.map((image) => ({
+                type: "image" as const,
+                image,
                 mediaType: "image/png",
-              },
+              })),
             ],
           },
         ],
