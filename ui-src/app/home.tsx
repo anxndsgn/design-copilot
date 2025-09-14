@@ -28,27 +28,28 @@ export default function Home() {
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  const awaitDesignImage = () =>
-    new Promise<Uint8Array>((resolve, reject) => {
+  const awaitDesignImages = () =>
+    new Promise<Uint8Array[]>((resolve, reject) => {
       const onMessage = (event: MessageEvent) => {
         const message =
           (event.data && (event.data as any).pluginMessage) || undefined;
         if (!message) return;
-        if (message.type === "get-design-image") {
+        if (message.type === "get-design-images") {
           window.removeEventListener("message", onMessage);
           try {
-            // message.designImage can be ArrayBuffer or Uint8Array
-            const data =
-              message.designImage instanceof ArrayBuffer
-                ? new Uint8Array(message.designImage)
-                : new Uint8Array(message.designImage);
-            resolve(data);
+            // message.images can contain ArrayBuffer or Uint8Array entries
+            const arr: Uint8Array[] = (message.images as any[]).map((img) =>
+              img instanceof ArrayBuffer
+                ? new Uint8Array(img)
+                : new Uint8Array(img)
+            );
+            resolve(arr);
           } catch (e) {
             reject(
               e instanceof Error ? e : new Error("Invalid image data received")
             );
           }
-        } else if (message.type === "get-design-image-error") {
+        } else if (message.type === "get-design-images-error") {
           window.removeEventListener("message", onMessage);
           reject(
             new Error(
@@ -72,8 +73,8 @@ export default function Home() {
           "OpenRouter API key is missing. Please enter it above."
         );
       }
-      parent.postMessage({ pluginMessage: { type: "get-design-image" } }, "*");
-      const imageBytes = await awaitDesignImage();
+      parent.postMessage({ pluginMessage: { type: "get-design-images" } }, "*");
+      const images = await awaitDesignImages();
 
       const openrouter = createOpenRouter({ apiKey });
       const chatModel = openrouter.chat("google/gemini-2.5-flash");
@@ -85,13 +86,13 @@ export default function Home() {
             content: [
               {
                 type: "text",
-                text: "你是一个超级犀利的设计锐评师，拥有超凡的观察力和表达能力，能从给你的设计稿图片中揪出最可笑、最讽刺的点，然后用最幽默、最自嘲、最讽刺、最刁钻、最尖锐的语言进行点评，还能通过各种新奇的角度、形象的比喻、讽刺的成语以及拿其他事物来做对比，把设计稿批得体无完肤。语言要足够幽默、嘲讽、尖锐。",
+                text: "你是一位专业设计评审。以下给出多张按顺序排列的设计稿图片（顺序为 #1、#2、#3 ...），这些图片可能会很相似，因为可能只调整了一些细节，请仔细查看其中的区别。请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；\n3) 明确指出你选择的编号（如：#2），并解释为何它优于其他方案（可简要点评其他图的主要问题）。",
               },
-              {
-                type: "image",
-                image: imageBytes,
+              ...images.map((img) => ({
+                type: "image" as const,
+                image: img,
                 mediaType: "image/png",
-              },
+              })),
             ],
           },
         ],
