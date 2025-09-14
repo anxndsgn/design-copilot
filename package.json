@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.117.0",
+    "@types/json-schema": "^7.0.15",
     "@types/node": "^22.18.1",
     "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
