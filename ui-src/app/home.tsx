@@ -123,7 +123,7 @@ export default function Home() {
   return (
     <div className="h-full flex flex-col">
       <Button disabled={isLoading} onClick={handleClick}>
-        {isLoading ? "Streaming…" : "Get feedback"}
+        {isLoading ? "Thinking..." : "Which is Better?"}
       </Button>
       <ScrollArea.Root className="mt-2 h-72 text-black-1000 dark:text-white-1000 typography-body-large overflow-y-auto bg-grey-100 dark:bg-grey-700 rounded-md">
         <ScrollArea.Viewport className="h-full p-2 overscroll-contain rounded-md">
