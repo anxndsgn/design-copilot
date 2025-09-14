@@ -12,6 +12,7 @@ export async function getDesignImages() {
   }
 
   try {
+    const names = selection.map((node) => node.name || "");
     const images = await Promise.all(
       selection.map((node) =>
         node.exportAsync({
@@ -21,7 +22,7 @@ export async function getDesignImages() {
     );
 
     figma.ui.postMessage(
-      { type: "get-design-images", images },
+      { type: "get-design-images", images, names },
       { origin: "*" }
     );
   } catch (err) {
