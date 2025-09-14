@@ -29,7 +29,7 @@ export default function Home() {
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  type DesignImage = { image: Uint8Array; imageName: string };
+  type DesignImage = { image: Uint8Array; imageName: string; nodeKey: string };
 
   const awaitDesignImages = () =>
     new Promise<DesignImage[]>((resolve, reject) => {
@@ -48,7 +48,8 @@ export default function Home() {
                   ? new Uint8Array(raw)
                   : new Uint8Array(raw);
               const imageName = String(item.imageName ?? "");
-              return { image, imageName };
+              const nodeKey = String(item.nodeKey ?? "");
+              return { image, imageName, nodeKey };
             });
             resolve(arr);
           } catch (e) {
@@ -90,6 +91,7 @@ export default function Home() {
         schema: z.object({
           bestDesignName: z.string().min(1),
           bestDesignReason: z.string().min(1),
+          bestDesignNodeKey: z.string().min(1),
         }),
         // Ensure JSON-mode generation for providers via OpenRouter
         mode: "json",
@@ -105,11 +107,12 @@ export default function Home() {
                 type: "text",
                 text: `以下给出多张按顺序排列的设计稿图片。${images.map(({ imageName }) => `图片${imageName}`).join(", ")} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字。\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
               },
-              ...images.map(({ image: img, imageName }) => ({
+              ...images.map(({ image: img, imageName, nodeKey }) => ({
                 type: "image" as const,
                 image: img,
                 mediaType: "image/png",
                 name: imageName,
+                nodeKey: nodeKey,
               })),
             ],
           },

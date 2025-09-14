@@ -21,7 +21,7 @@ export async function getDesignImages() {
             value: 2,
           },
         });
-        return { image, imageName: node.name || "" } as const;
+        return { image, imageName: node.name || "", nodeKey: node.id } as const;
       })
     );
 
