@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText } from "ai";
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@base-ui-components/react/scroll-area";
 import { Streamdown } from "streamdown";
+import { streamObject } from "ai";
+import { z } from "zod";
 
 export default function Home() {
   const [output, setOutput] = useState<string>("");
@@ -82,19 +83,27 @@ export default function Home() {
       parent.postMessage({ pluginMessage: { type: "get-design-images" } }, "*");
       const images = await awaitDesignImages();
 
-      console.log(images);
-
       const openrouter = createOpenRouter({ apiKey });
       const chatModel = openrouter.chat("google/gemini-2.5-flash");
-      const result = streamText({
+      const { partialObjectStream, object } = streamObject({
         model: chatModel,
+        schema: z.object({
+          bestDesignName: z.string().min(1),
+          bestDesignReason: z.string().min(1),
+        }),
+        // Ensure JSON-mode generation for providers via OpenRouter
+        mode: "json",
         messages: [
+          {
+            role: "system",
+            content: "你是一位专业设计评审，熟悉Apple HIG与Material Design。",
+          },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: `你是一位专业设计评审，熟悉Apple HIG与Material Design。以下给出多张按顺序排列的设计稿图片。${images.map(({ imageName }) => `图片${imageName}`).join(", ")} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字。\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
+                text: `以下给出多张按顺序排列的设计稿图片。${images.map(({ imageName }) => `图片${imageName}`).join(", ")} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字。\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
               },
               ...images.map(({ image: img, imageName }) => ({
                 type: "image" as const,
@@ -105,13 +114,21 @@ export default function Home() {
             ],
           },
         ],
+
         onError({ error }) {
           setError(error instanceof Error ? error.message : String(error));
         },
       });
-
-      for await (const delta of result.textStream) {
-        setOutput((prev) => prev + delta);
+      // Stream partial structured output as it forms
+      for await (const partial of partialObjectStream) {
+        if (typeof partial.bestDesignReason === "string") {
+          setOutput(partial.bestDesignReason);
+        }
+      }
+      // Ensure final object is applied
+      const finalObject = await object;
+      if (finalObject?.bestDesignReason) {
+        setOutput(finalObject.bestDesignReason);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
