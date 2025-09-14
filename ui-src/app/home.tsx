@@ -8,6 +8,7 @@ import { z } from "zod";
 
 export default function Home() {
   const [output, setOutput] = useState<string>("");
+  const [bestDesignName, setBestDesignName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [apiKey, setApiKey] = useState<string>("");
@@ -126,12 +127,18 @@ export default function Home() {
       for await (const partial of partialObjectStream) {
         if (typeof partial.bestDesignReason === "string") {
           setOutput(partial.bestDesignReason);
+          setBestDesignName(
+            partial.bestDesignName ? partial.bestDesignName : ""
+          );
         }
       }
       // Ensure final object is applied
       const finalObject = await object;
       if (finalObject?.bestDesignReason) {
         setOutput(finalObject.bestDesignReason);
+        setBestDesignName(
+          finalObject.bestDesignName ? finalObject.bestDesignName : ""
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -148,6 +155,7 @@ export default function Home() {
       <ScrollArea.Root className="mt-2 h-72 text-black-1000 dark:text-white-1000 typography-body-large overflow-y-auto bg-grey-100 dark:bg-grey-700 rounded-md">
         <ScrollArea.Viewport className="h-full p-2 overscroll-contain rounded-md">
           {error && <p className="text-red-500">{error}</p>}
+          {output && <p className="font-bold">Best design: {bestDesignName}</p>}
           {output && (
             <Streamdown
               components={{
