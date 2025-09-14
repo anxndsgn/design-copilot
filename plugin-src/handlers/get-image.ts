@@ -12,17 +12,17 @@ export async function getDesignImages() {
   }
 
   try {
-    const names = selection.map((node) => node.name || "");
     const images = await Promise.all(
-      selection.map((node) =>
-        node.exportAsync({
+      selection.map(async (node) => {
+        const image = await node.exportAsync({
           format: "PNG",
-        })
-      )
+        });
+        return { image, imageName: node.name || "" } as const;
+      })
     );
 
     figma.ui.postMessage(
-      { type: "get-design-images", images, names },
+      { type: "get-design-images", images },
       { origin: "*" }
     );
   } catch (err) {
