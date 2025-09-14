@@ -13,7 +13,7 @@ importers:
         version: 1.0.0-beta.3(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@openrouter/ai-sdk-provider':
         specifier: ^1.2.0
-        version: 1.2.0(ai@5.0.34(zod@4.1.5))(zod@4.1.5)
+        version: 1.2.0(ai@5.0.34(zod@4.1.8))(zod@4.1.8)
       '@tailwindcss/postcss':
         specifier: ^4.1.13
         version: 4.1.13
@@ -25,7 +25,7 @@ importers:
         version: 4.7.0(vite@6.3.5(@types/node@22.18.1)(jiti@2.5.1)(lightningcss@1.30.1))
       ai:
         specifier: ^5.0.34
-        version: 5.0.34(zod@4.1.5)
+        version: 5.0.34(zod@4.1.8)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -53,6 +53,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.13
+      zod:
+        specifier: ^4.1.8
+        version: 4.1.8
     devDependencies:
       '@figma/plugin-typings':
         specifier: ^1.117.0
@@ -2270,26 +2273,26 @@ packages:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
 
-  zod@4.1.5:
-    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
+  zod@4.1.8:
+    resolution: {integrity: sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
-  '@ai-sdk/gateway@1.0.19(zod@4.1.5)':
+  '@ai-sdk/gateway@1.0.19(zod@4.1.8)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.8(zod@4.1.5)
-      zod: 4.1.5
+      '@ai-sdk/provider-utils': 3.0.8(zod@4.1.8)
+      zod: 4.1.8
 
-  '@ai-sdk/provider-utils@3.0.8(zod@4.1.5)':
+  '@ai-sdk/provider-utils@3.0.8(zod@4.1.8)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
-      zod: 4.1.5
+      zod: 4.1.8
 
   '@ai-sdk/provider@2.0.0':
     dependencies:
@@ -2670,10 +2673,10 @@ snapshots:
     dependencies:
       langium: 3.3.1
 
-  '@openrouter/ai-sdk-provider@1.2.0(ai@5.0.34(zod@4.1.5))(zod@4.1.5)':
+  '@openrouter/ai-sdk-provider@1.2.0(ai@5.0.34(zod@4.1.8))(zod@4.1.8)':
     dependencies:
-      ai: 5.0.34(zod@4.1.5)
-      zod: 4.1.5
+      ai: 5.0.34(zod@4.1.8)
+      zod: 4.1.8
 
   '@opentelemetry/api@1.9.0': {}
 
@@ -3112,13 +3115,13 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ai@5.0.34(zod@4.1.5):
+  ai@5.0.34(zod@4.1.8):
     dependencies:
-      '@ai-sdk/gateway': 1.0.19(zod@4.1.5)
+      '@ai-sdk/gateway': 1.0.19(zod@4.1.8)
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.8(zod@4.1.5)
+      '@ai-sdk/provider-utils': 3.0.8(zod@4.1.8)
       '@opentelemetry/api': 1.9.0
-      zod: 4.1.5
+      zod: 4.1.8
 
   ansi-regex@5.0.1: {}
 
@@ -4742,6 +4745,6 @@ snapshots:
       y18n: 5.0.8
       yargs-parser: 21.1.1
 
-  zod@4.1.5: {}
+  zod@4.1.8: {}
 
   zwitch@2.0.4: {}
