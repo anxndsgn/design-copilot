@@ -16,6 +16,10 @@ export async function getDesignImages() {
       selection.map(async (node) => {
         const image = await node.exportAsync({
           format: "PNG",
+          constraint: {
+            type: "SCALE",
+            value: 2,
+          },
         });
         return { image, imageName: node.name || "" } as const;
       })
