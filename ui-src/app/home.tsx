@@ -5,7 +5,7 @@ import { ScrollArea } from "@base-ui-components/react/scroll-area";
 import { Streamdown } from "streamdown";
 import { streamObject } from "ai";
 import { z } from "zod";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, type LanguageOption } from "@/lib/store";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -16,6 +16,7 @@ export default function Home() {
   const bestDesignName = useAppStore((state) => state.bestDesignName);
   const setAnswer = useAppStore((state) => state.setAnswer);
   const clearAnswer = useAppStore((state) => state.clearAnswer);
+  const language = useAppStore((state) => state.language);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: "get-api-key" } }, "*");
@@ -76,6 +77,27 @@ export default function Home() {
       window.addEventListener("message", onMessage);
     });
 
+  const buildPrompts = (lang: LanguageOption, images: DesignImage[]) => {
+    if (lang === "en") {
+      const imageList = images
+        .map(({ imageName }) => `Image ${imageName}`)
+        .join(", ");
+      return {
+        system:
+          "You are a professional design reviewer, well versed in Apple HIG and Material Design. Respond in English.",
+        user: `You will receive several design mockups in order: ${imageList}. **Some mockups may look very similar, so look carefully for subtle differences.** Please:\n1) Choose the mockup you believe is the strongest.\n2) State the winning design name in the first line of your response.\n3) Provide a concise, persuasive rationale (consider visual hierarchy, clarity of information, spacing and layout, typographic consistency, contrast and alignment, readability, and stylistic coherence).`,
+      };
+    }
+    const imageList = images
+      .map(({ imageName }) => `图片${imageName}`)
+      .join("，");
+    return {
+      system:
+        "你是一位专业设计评审，熟悉Apple HIG与Material Design。请使用简体中文回答。",
+      user: `以下给出多张按顺序排列的设计稿图片。${imageList} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字；\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
+    };
+  };
+
   const handleClick = async () => {
     setIsLoading(true);
     setError("");
@@ -91,6 +113,8 @@ export default function Home() {
 
       const openrouter = createOpenRouter({ apiKey });
       const chatModel = openrouter.chat("google/gemini-2.5-flash");
+      const prompts = buildPrompts(language, images);
+
       const { partialObjectStream, object } = streamObject({
         model: chatModel,
         schema: z.object({
@@ -103,14 +127,14 @@ export default function Home() {
         messages: [
           {
             role: "system",
-            content: "你是一位专业设计评审，熟悉Apple HIG与Material Design。",
+            content: prompts.system,
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: `以下给出多张按顺序排列的设计稿图片。${images.map(({ imageName }) => `图片${imageName}`).join(", ")} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字。\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
+                text: prompts.user,
               },
               ...images.map(({ image: img, imageName, nodeKey }) => ({
                 type: "image" as const,
