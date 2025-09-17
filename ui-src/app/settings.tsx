@@ -1,9 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
 export default function Settings() {
-  const [apiKey, setApiKey] = useState("");
+  const apiKey = useAppStore((state) => state.apiKey);
+  const setApiKey = useAppStore((state) => state.setApiKey);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setApiKey(e.target.value);
