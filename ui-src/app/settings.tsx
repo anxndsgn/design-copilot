@@ -45,8 +45,15 @@ export default function Settings() {
         <span className="typography-body-small text-black-700 dark:text-white-700">
           Display language
         </span>
-        <Select value={language} onValueChange={handleLanguageChange}>
-          <SelectTrigger className="w-full">
+        <Select
+          value={language}
+          onValueChange={handleLanguageChange}
+          items={[
+            { value: "en", label: "English" },
+            { value: "zh", label: "中文" },
+          ]}
+        >
+          <SelectTrigger className={"w-fit"}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
