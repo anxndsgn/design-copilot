@@ -29,6 +29,11 @@ export default function Home() {
       if (message?.type === "get-api-key") {
         setApiKey(message.apiKey ?? "");
         console.log("API key set", message.apiKey);
+      } else if (message?.type === "select-best-design-success") {
+        console.log("Successfully selected node:", message.nodeName);
+      } else if (message?.type === "select-best-design-error") {
+        console.error("Failed to select node:", message.error);
+        setError(`Selection error: ${message.error}`);
       }
     };
     window.addEventListener("message", handler);
@@ -80,21 +85,21 @@ export default function Home() {
   const buildPrompts = (lang: LanguageOption, images: DesignImage[]) => {
     if (lang === "en") {
       const imageList = images
-        .map(({ imageName }) => `Image ${imageName}`)
+        .map(({ imageName, nodeKey }) => `Image ${imageName} (ID: ${nodeKey})`)
         .join(", ");
       return {
         system:
-          "You are a professional design reviewer, well versed in Apple HIG and Material Design. Respond in English.",
-        user: `You will receive several design mockups in order: ${imageList}. **Some mockups may look very similar, so look carefully for subtle differences.** Please:\n1) Choose the mockup you believe is the strongest.\n2) State the winning design name in the first line of your response.\n3) Provide a concise, persuasive rationale (consider visual hierarchy, clarity of information, spacing and layout, typographic consistency, contrast and alignment, readability, and stylistic coherence).`,
+          "You are a professional design reviewer, well versed in Apple HIG and Material Design. Respond in English. You must return the exact node ID of the best design.",
+        user: `You will receive several design mockups in order: ${imageList}. **Some mockups may look very similar, so look carefully for subtle differences.** Please:\n1) Choose the mockup you believe is the strongest.\n2) State the winning design name in the first line of your response.\n3) Return the exact node ID (the ID value in parentheses) of the best design.\n4) Provide a concise, persuasive rationale (consider visual hierarchy, clarity of information, spacing and layout, typographic consistency, contrast and alignment, readability, and stylistic coherence).`,
       };
     }
     const imageList = images
-      .map(({ imageName }) => `图片${imageName}`)
+      .map(({ imageName, nodeKey }) => `图片${imageName}（ID: ${nodeKey}）`)
       .join("，");
     return {
       system:
-        "你是一位专业设计评审，熟悉Apple HIG与Material Design。请使用简体中文回答。",
-      user: `以下给出多张按顺序排列的设计稿图片。${imageList} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字；\n3) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
+        "你是一位专业设计评审，熟悉Apple HIG与Material Design。请使用简体中文回答。你必须返回最佳设计的准确节点ID。",
+      user: `以下给出多张按顺序排列的设计稿图片。${imageList} **这些图片可能会很相似，因为可能只调整了一些细节，请认真仔细查看其中的区别。**请：\n1) 在这些图片中选择一个你认为最好的设计；\n2) 在返回的第一行就明确指出你选择的设计稿的名字；\n3) 返回最佳设计的准确节点ID（括号中的ID值）；\n4) 给出简明、有说服力的理由（从视觉层级、信息传达、留白与布局、排版一致性、对比与对齐、可读性、风格统一性等角度）；`,
     };
   };
 
@@ -157,6 +162,7 @@ export default function Home() {
           setAnswer({
             answer: partial.bestDesignReason,
             bestDesignName: partial.bestDesignName ?? "",
+            bestDesignNodeKey: partial.bestDesignNodeKey ?? "",
           });
         }
       }
@@ -166,7 +172,21 @@ export default function Home() {
         setAnswer({
           answer: finalObject.bestDesignReason,
           bestDesignName: finalObject.bestDesignName ?? "",
+          bestDesignNodeKey: finalObject.bestDesignNodeKey ?? "",
         });
+
+        // Automatically select the best design node in Figma
+        if (finalObject.bestDesignNodeKey) {
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "select-best-design",
+                nodeKey: finalObject.bestDesignNodeKey,
+              },
+            },
+            "*"
+          );
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

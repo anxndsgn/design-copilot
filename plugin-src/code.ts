@@ -1,6 +1,7 @@
 import { getApiKey } from "./handlers/get-api-key";
 import { setApiKey } from "./handlers/set-api-key";
 import { getDesignImages } from "./handlers/get-image";
+import { selectBestDesignNode } from "./handlers/select-best-design";
 
 figma.showUI(__html__, { themeColors: true, height: 400 });
 
@@ -12,5 +13,7 @@ figma.ui.onmessage = async (msg) => {
     figma.ui.postMessage({ type: "get-api-key", apiKey }, { origin: "*" });
   } else if (msg.type === "get-design-images") {
     getDesignImages();
+  } else if (msg.type === "select-best-design") {
+    await selectBestDesignNode(msg.nodeKey);
   }
 };
