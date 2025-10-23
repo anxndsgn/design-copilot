@@ -3,6 +3,8 @@
     "target": "es2020",
     "lib": ["es2020"],
     "strict": true,
-    "types": ["@figma/plugin-typings"]
+    "types": ["@figma/plugin-typings"],
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }
