@@ -1,13 +1,13 @@
 {
-  "name": "Design Copilot",
-  "id": "design-copilot",
+  "name": "Which is Better?",
+  "id": "which-is-better",
   "api": "1.0.0",
   "editorType": ["figma"],
   "permissions": [],
   "main": "dist/code.js",
   "ui": "dist/index.html",
   "networkAccess": {
-    "allowedDomains": ["none"]
+    "allowedDomains": ["https://openrouter.ai/api/v1/"]
   },
   "documentAccess": "dynamic-page"
 }

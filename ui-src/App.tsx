@@ -1,7 +1,24 @@
+import Home from "./app/home";
+import Settings from "./app/settings";
+import { Tab, Tabs, TabsList, TabsPanel } from "./components/ui/tabs";
+import { Separator } from "./components/ui/sepatator";
+
 function App() {
   return (
-    <main className="p-5 flex flex-col gap-4">
-      <h1>Hello World</h1>
+    <main className="flex flex-col bg-white-1000 dark:bg-grey-800 h-screen">
+      <Tabs defaultValue="home" className="flex-1 flex flex-col">
+        <TabsList className={"p-2"}>
+          <Tab value="home">Home</Tab>
+          <Tab value="settings">Settings</Tab>
+        </TabsList>
+        <Separator />
+        <TabsPanel value="home" className={"p-2 h-full flex-1"}>
+          <Home />
+        </TabsPanel>
+        <TabsPanel value="settings" className={"p-2 h-full flex-1"}>
+          <Settings />
+        </TabsPanel>
+      </Tabs>
     </main>
   );
 }
