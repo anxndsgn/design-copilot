@@ -6,6 +6,7 @@ import { Streamdown } from "streamdown";
 import { streamObject } from "ai";
 import { z } from "zod";
 import { useAppStore, type LanguageOption } from "@/lib/store";
+import { VISION_MODEL_OPTIONS } from "@/constants/vision-models";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -17,9 +18,12 @@ export default function Home() {
   const setAnswer = useAppStore((state) => state.setAnswer);
   const clearAnswer = useAppStore((state) => state.clearAnswer);
   const language = useAppStore((state) => state.language);
+  const visionModel = useAppStore((state) => state.visionModel);
+  const setVisionModel = useAppStore((state) => state.setVisionModel);
 
   useEffect(() => {
     parent.postMessage({ pluginMessage: { type: "get-api-key" } }, "*");
+    parent.postMessage({ pluginMessage: { type: "get-vision-model" } }, "*");
   }, []);
 
   useEffect(() => {
@@ -29,6 +33,13 @@ export default function Home() {
       if (message?.type === "get-api-key") {
         setApiKey(message.apiKey ?? "");
         console.log("API key set", message.apiKey);
+      } else if (message?.type === "get-vision-model") {
+        if (typeof message.model === "string") {
+          const matched = VISION_MODEL_OPTIONS.find((option) => option.id === message.model);
+          if (matched) {
+            setVisionModel(matched.id);
+          }
+        }
       } else if (message?.type === "select-best-design-success") {
         console.log("Successfully selected node:", message.nodeName);
       } else if (message?.type === "select-best-design-error") {
@@ -117,7 +128,10 @@ export default function Home() {
       const images = await awaitDesignImages();
 
       const openrouter = createOpenRouter({ apiKey });
-      const chatModel = openrouter.chat("google/gemini-2.5-flash");
+      const selectedModel =
+        VISION_MODEL_OPTIONS.find((option) => option.id === visionModel)?.id ??
+        "google/gemini-2.5-flash";
+      const chatModel = openrouter.chat(selectedModel);
       const prompts = buildPrompts(language, images);
 
       const { partialObjectStream, object } = streamObject({

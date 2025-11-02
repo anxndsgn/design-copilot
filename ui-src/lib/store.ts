@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { VisionModelId } from "@/constants/vision-models";
 
 export type LanguageOption = "en" | "zh";
 
@@ -13,6 +14,8 @@ type AppState = {
   clearAnswer: () => void;
   language: LanguageOption;
   setLanguage: (language: LanguageOption) => void;
+  visionModel: VisionModelId;
+  setVisionModel: (model: VisionModelId) => void;
 };
 
 export const useAppStore = create<AppState>()(
@@ -28,6 +31,8 @@ export const useAppStore = create<AppState>()(
       clearAnswer: () => set({ answer: "", bestDesignName: "", bestDesignNodeKey: "" }),
       language: "zh",
       setLanguage: (language) => set({ language }),
+      visionModel: "google/gemini-2.5-flash",
+      setVisionModel: (model) => set({ visionModel: model }),
     }),
     {
       name: "design-copilot-store",

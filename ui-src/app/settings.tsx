@@ -8,12 +8,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAppStore, type LanguageOption } from "@/lib/store";
+import {
+  VISION_MODEL_OPTIONS,
+  type VisionModelId,
+} from "@/constants/vision-models";
 
 export default function Settings() {
   const apiKey = useAppStore((state) => state.apiKey);
   const setApiKey = useAppStore((state) => state.setApiKey);
   const language = useAppStore((state) => state.language);
   const setLanguage = useAppStore((state) => state.setLanguage);
+  const visionModel = useAppStore((state) => state.visionModel);
+  const setVisionModel = useAppStore((state) => state.setVisionModel);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setApiKey(e.target.value);
@@ -27,6 +33,22 @@ export default function Settings() {
     if (typeof value === "string") {
       setLanguage(value as LanguageOption);
     }
+  };
+
+  const handleVisionModelChange = (value: unknown) => {
+    if (typeof value !== "string") return;
+    const matchedOption = VISION_MODEL_OPTIONS.find(
+      (option) => option.id === value
+    );
+    if (!matchedOption) return;
+    const modelId = matchedOption.id as VisionModelId;
+    setVisionModel(modelId);
+    parent.postMessage(
+      {
+        pluginMessage: { type: "set-vision-model", model: modelId },
+      },
+      "*"
+    );
   };
 
   return (
@@ -59,6 +81,23 @@ export default function Settings() {
           <SelectContent>
             <SelectItem value="en">English</SelectItem>
             <SelectItem value="zh">中文</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="typography-body-small text-black-700 dark:text-white-700">
+          Vision model
+        </span>
+        <Select value={visionModel} onValueChange={handleVisionModelChange}>
+          <SelectTrigger className="w-fit">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="max-h-64">
+            {VISION_MODEL_OPTIONS.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                <span>{option.label}</span>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
