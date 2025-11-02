@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { VisionModelId } from "@/constants/vision-models";
 
 export type LanguageOption = "en" | "zh";
@@ -18,24 +17,17 @@ type AppState = {
   setVisionModel: (model: VisionModelId) => void;
 };
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set) => ({
-      apiKey: "",
-      bestDesignName: "",
-      bestDesignNodeKey: "",
-      answer: "",
-      setApiKey: (apiKey) => set({ apiKey }),
-      setAnswer: ({ answer, bestDesignName = "", bestDesignNodeKey = "" }) =>
-        set({ answer, bestDesignName, bestDesignNodeKey }),
-      clearAnswer: () => set({ answer: "", bestDesignName: "", bestDesignNodeKey: "" }),
-      language: "zh",
-      setLanguage: (language) => set({ language }),
-      visionModel: "google/gemini-2.5-flash",
-      setVisionModel: (model) => set({ visionModel: model }),
-    }),
-    {
-      name: "design-copilot-store",
-    }
-  )
-);
+export const useAppStore = create<AppState>()((set) => ({
+  apiKey: "",
+  bestDesignName: "",
+  bestDesignNodeKey: "",
+  answer: "",
+  setApiKey: (apiKey) => set({ apiKey }),
+  setAnswer: ({ answer, bestDesignName = "", bestDesignNodeKey = "" }) =>
+    set({ answer, bestDesignName, bestDesignNodeKey }),
+  clearAnswer: () => set({ answer: "", bestDesignName: "", bestDesignNodeKey: "" }),
+  language: "zh",
+  setLanguage: (language) => set({ language }),
+  visionModel: "google/gemini-2.5-flash",
+  setVisionModel: (model) => set({ visionModel: model }),
+}));
