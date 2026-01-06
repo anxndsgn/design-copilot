@@ -1,6 +1,6 @@
 export type VisionModelId =
-  | "google/gemini-3.0-flash-preview"
-  | "google/gemini-3.0-pro-preview"
+  | "google/gemini-3.0-flash"
+  | "google/gemini-3.0-pro"
   | "openai/gpt-5"
   | "openai/gpt-5-mini";
 
@@ -12,14 +12,14 @@ export type VisionModelOption = {
 
 export const VISION_MODEL_OPTIONS: VisionModelOption[] = [
   {
-    id: "google/gemini-3.0-flash-preview",
-    label: "Gemini 3.0 Flash Preview",
+    id: "google/gemini-3.0-flash",
+    label: "Gemini 3.0 Flash",
     description:
       "Fast multimodal model from Google, suitable for iterative reviews.",
   },
   {
-    id: "google/gemini-3.0-pro-preview",
-    label: "Gemini 3.0 Pro Preview",
+    id: "google/gemini-3.0-pro",
+    label: "Gemini 3.0 Pro",
     description:
       "Higher-quality Gemini model for in-depth analysis with images.",
   },
